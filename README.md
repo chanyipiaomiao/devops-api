@@ -44,10 +44,10 @@
 1. 自定义配置(**该步骤可选**)
 
 	- 配置监听端口
-	- 配置上传目录,确保有权限写入
-	- 配置日志目录,默认情况当前目录下,确保有权限写入
+	- 配置上传目录,确保有权限写入
+	- 配置日志目录,默认情况当前目录下,确保有权限写入
 	- 配置日志最大存放天数
-	- 配置邮箱地址、端口、用户名、密码
+	- 配置邮箱地址、端口、用户名、密码
 	- 配置是否启用token验证
 	- 配置jwt token签名字符串,请自行生成修改
 
@@ -63,7 +63,7 @@
 ./devops-api init --refresh-root-token
 ```
 
-3. 使用root token 生成普通的token，用于验证请求(**该步骤可选**)
+3. 使用root token 生成普通的token，用于验证请求(**该步骤可选**)
 
 ```shell
 ./devops-api token --create=名称 --root-token=上边的root token
@@ -192,7 +192,7 @@ print(response.json())
 
 ### Go 文本邮件/html邮件 示例
 
-记得安装 grequests
+记得安装 grequests
 
 ```go
 go get github.com/levigross/grequests
@@ -324,7 +324,7 @@ Linux
 alias genpwd="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation?length=64;echo"
 alias genpwdspecial="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation?length=64&specialChar=yes;echo"
 ```
-Mac 可能需要把?=&转义一下
+Mac 可能需要把?=&转义一下
 
 ```shell
 alias genpwd="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation\?length\=64;echo"
