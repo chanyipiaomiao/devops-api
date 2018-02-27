@@ -4,7 +4,7 @@
 APP_NAME=devops-api
 
 # 程序的版本
-APP_VERSION=1.0.0
+APP_VERSION=0.1.0
 
 # 编译时的Go版本
 GO_VERSION=`go version | awk '{print $3}'`

@@ -8,7 +8,7 @@ var (
 	AppName = "devops-api"
 
 	// AppVersion 程序版本号
-	AppVersion = "1.0.0"
+	AppVersion = "0.1.0"
 
 	// AppDescription 程序描述
 	AppDescription = "happy with devops-api"
