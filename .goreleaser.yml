@@ -1,0 +1,16 @@
+builds:
+  - main: main.go
+    binary: devops-api
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - 386
+archive:
+  format: tar.gz
+  replacements:
+    amd64: 64-bit
+    darwin: macos
+    linux: linux
