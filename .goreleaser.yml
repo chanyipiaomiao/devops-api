@@ -15,5 +15,3 @@ archive:
     amd64: 64-bit
     darwin: macos
     linux: linux
-env:
-  - CGO_ENABLED=0
