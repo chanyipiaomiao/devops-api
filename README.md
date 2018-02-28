@@ -34,7 +34,7 @@
 
 ## 安装
 
-直接下载二级制文件即可
+直接[**下载**](https://github.com/chanyipiaomiao/devops-api/releases)二级制文件即可
 
 ## 使用
 
