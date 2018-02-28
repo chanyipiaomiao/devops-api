@@ -8,7 +8,7 @@ builds:
     goarch:
       - amd64
       - 386
-  - ldflags: -s -w -X "devops-api/common.BuildDate={{.Env.BUILD_DATE}}" -X "devops-api/common.CommitHash={{.Env.COMMIT_HASH}}" -X "devops-api/common.AppVersion={{.Env.APP_VERSION}}" -X "devops-api/common.GoVersion={{.Env.GO_VERSION}}"
+  - ldflags: -s -w -X "devops-api/common.BuildDate={{.Date}}" -X "devops-api/common.CommitHash={{.Commit}}" -X "devops-api/common.AppVersion={{.Version}}" -X "devops-api/common.GoVersion={{.Env.GO_VERSION}}"
 archive:
   format: tar.gz
   wrap_in_directory: true
@@ -16,7 +16,14 @@ archive:
     amd64: 64-bit
     darwin: macos
     linux: linux
+  goos:
+      - darwin
+      - windows
+      - linux
   files:
     - LICENSE
     - README.md
     - conf/*
+  format_overrides:
+    - goos: windows
+      format: zip
