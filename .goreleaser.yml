@@ -16,10 +16,6 @@ archive:
     amd64: 64-bit
     darwin: macos
     linux: linux
-  goos:
-      - darwin
-      - windows
-      - linux
   files:
     - LICENSE
     - README.md
