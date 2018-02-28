@@ -11,7 +11,12 @@ builds:
   - ldflags: -s -w -X "devops-api/common.BuildDate={{.Env.BUILD_DATE}}" -X "devops-api/common.CommitHash={{.Env.COMMIT_HASH}}" -X "devops-api/common.AppVersion={{.Env.APP_VERSION}}" -X "devops-api/common.GoVersion={{.Env.GO_VERSION}}"
 archive:
   format: tar.gz
+  wrap_in_directory: true
   replacements:
     amd64: 64-bit
     darwin: macos
     linux: linux
+  files:
+    - LICENSE
+    - README.md
+    - conf/*
