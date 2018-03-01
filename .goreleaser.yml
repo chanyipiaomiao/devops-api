@@ -1,3 +1,8 @@
+release:
+  github:
+    owner: chanyipiaomiao
+    name: devops-api
+  name_template: '{{.Tag}}'
 builds:
   - main: main.go
     binary: devops-api
