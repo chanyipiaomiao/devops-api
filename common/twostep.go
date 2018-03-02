@@ -83,29 +83,53 @@ func (t *TwoStepAuth) GetOtp() (*twofactor.Totp, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(m[t.Username]) != 0 {
-		otp, err := twofactor.TOTPFromBytes(m[t.Username], t.Issuer)
-		if err != nil {
-			return nil, err
-		}
-		return otp, nil
+	if len(m[t.Username]) == 0 {
+		return nil, nil
 	}
-	return nil, fmt.Errorf("%s not exist", t.Username)
+	otp, err := twofactor.TOTPFromBytes(m[t.Username], t.Issuer)
+	if err != nil {
+		return nil, err
+	}
+	return otp, nil
+}
+
+// createQRImg 创建二维码图片
+func (t *TwoStepAuth) createQRImg(otp *twofactor.Totp, imgPath string) error {
+	qrBytes, err := otp.QR()
+	if err != nil {
+		return err
+	}
+
+	err = hltool.BytesToImage(qrBytes, imgPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Enable 启用2步验证
 // return 生成的二维码图片路径 和 KEY，可以手动添加KEY，如果不支持扫描
 func (t *TwoStepAuth) Enable() (map[string]interface{}, error) {
-	otp, err := twofactor.NewTOTP(t.Username, t.Issuer, crypto.SHA1, TwoStepAuthDigits)
-	if err != nil {
-		return nil, err
-	}
-	qrBytes, err := otp.QR()
-	if err != nil {
-		return nil, err
-	}
 	imgPath := path.Join(QrImageDir, t.Username+".png")
-	err = hltool.BytesToImage(qrBytes, imgPath)
+	otp, err := t.GetOtp()
+	if err != nil {
+		return nil, err
+	}
+	if otp != nil {
+		if !hltool.IsExist(imgPath) {
+			err = t.createQRImg(otp, imgPath)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, fmt.Errorf("%s aleady exist.", t.Username)
+	}
+	otp, err = twofactor.NewTOTP(t.Username, t.Issuer, crypto.SHA1, TwoStepAuthDigits)
+	if err != nil {
+		return nil, err
+	}
+
+	err = t.createQRImg(otp, imgPath)
 	if err != nil {
 		return nil, err
 	}
@@ -134,12 +158,7 @@ func (t *TwoStepAuth) Disable() error {
 	}
 
 	// 从数据库中删除该用户名
-	err = twoStepDb.Delete([]string{t.Username})
-	if err != nil {
-		return err
-	}
-
-	return fmt.Errorf("%s not exist", t.Username)
+	return twoStepDb.Delete([]string{t.Username})
 }
 
 // Auth 验证用户输入的6位数字

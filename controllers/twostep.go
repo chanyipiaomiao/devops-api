@@ -32,6 +32,7 @@ func (t *TwoStepAuthController) Enable() {
 			"requestId":  requestID,
 			"statuscode": 1,
 			"enable":     false,
+			"username":   username,
 			"result":     msg,
 		}
 		t.ServeJSON()
