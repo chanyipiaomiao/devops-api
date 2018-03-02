@@ -2,6 +2,7 @@ package common
 
 import (
 	"crypto"
+	"fmt"
 	"os"
 	"path"
 
@@ -82,14 +83,14 @@ func (t *TwoStepAuth) GetOtp() (*twofactor.Totp, error) {
 	if err != nil {
 		return nil, err
 	}
-	if m[t.Username] != nil {
+	if len(m[t.Username]) != 0 {
 		otp, err := twofactor.TOTPFromBytes(m[t.Username], t.Issuer)
 		if err != nil {
 			return nil, err
 		}
 		return otp, nil
 	}
-	return nil, nil
+	return nil, fmt.Errorf("%s not exist", t.Username)
 }
 
 // Enable 启用2步验证
@@ -117,6 +118,16 @@ func (t *TwoStepAuth) Enable() (map[string]interface{}, error) {
 
 // Disable 禁用2步验证 实际就是从数据库删除记录
 func (t *TwoStepAuth) Disable() error {
+
+	// 从磁盘上删除生成的用户对应的二维码图片文件
+	imgPath := path.Join(QrImageDir, t.Username+".png")
+	if hltool.IsExist(imgPath) {
+		err := os.Remove(imgPath)
+		if err != nil {
+			return err
+		}
+	}
+
 	twoStepDb, err := hltool.NewBoltDB(DBPath, twoStepTable)
 	if err != nil {
 		return err
@@ -128,16 +139,7 @@ func (t *TwoStepAuth) Disable() error {
 		return err
 	}
 
-	// 从磁盘上删除生成的用户对应的二维码图片文件
-	imgPath := path.Join(QrImageDir, t.Username+".png")
-	if hltool.IsExist(imgPath) {
-		err = os.Remove(imgPath)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return fmt.Errorf("%s not exist", t.Username)
 }
 
 // Auth 验证用户输入的6位数字

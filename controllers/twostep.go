@@ -26,11 +26,13 @@ func (t *TwoStepAuthController) Enable() {
 
 	m, err := two.Enable()
 	if err != nil {
-		common.GetLogger().Error(twoStepAuthLog, fmt.Sprintf("%s", err))
+		msg := fmt.Sprintf("%s", err)
+		common.GetLogger().Error(twoStepAuthLog, msg)
 		t.Data["json"] = map[string]interface{}{
 			"requestId":  requestID,
 			"statuscode": 1,
 			"enable":     false,
+			"result":     msg,
 		}
 		t.ServeJSON()
 		return
@@ -65,7 +67,9 @@ func (t *TwoStepAuthController) Disable() {
 	if err != nil {
 		result["statuscode"] = 1
 		result["disable"] = false
-		common.GetLogger().Error(twoStepAuthLog, fmt.Sprintf("%s", err))
+		msg := fmt.Sprintf("%s", err)
+		result["result"] = msg
+		common.GetLogger().Error(twoStepAuthLog, msg)
 		t.ServeJSON()
 		return
 	}
@@ -103,13 +107,16 @@ func (t *TwoStepAuthController) Auth() {
 	}
 	t.Data["json"] = result
 
-	if err != nil {
-		result["statuscode"] = 1
-		common.GetLogger().Error(twoStepAuthLog, fmt.Sprintf("%s", err))
+	if err == nil {
+		result["statuscode"] = 0
+		common.GetLogger().Info(twoStepAuthLog, "验证2步验证")
 		t.ServeJSON()
 		return
 	}
-	result["statuscode"] = 0
-	common.GetLogger().Info(twoStepAuthLog, "验证2步验证")
+	result["statuscode"] = 1
+	msg := fmt.Sprintf("%s", err)
+	result["result"] = msg
+	common.GetLogger().Error(twoStepAuthLog, msg)
 	t.ServeJSON()
+
 }
