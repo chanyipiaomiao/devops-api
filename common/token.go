@@ -40,7 +40,7 @@ func NewToken() (*Token, error) {
 }
 
 // GetToken 根据name获取token
-func (t *Token) GetToken(name string) (map[string]string, error) {
+func (t *Token) GetToken(name string) (map[string][]byte, error) {
 	result, err := tokenDb.Get([]string{name})
 	if err != nil {
 		return nil, fmt.Errorf("get token < %s > error: %s", name, err)
@@ -56,7 +56,7 @@ func (t *Token) IsExistToken(name string) (bool, error) {
 		return false, err
 	}
 
-	if result[name] != "" {
+	if string(result[name]) != "" {
 		return true, fmt.Errorf("exist < %s > token", name)
 	}
 
@@ -75,7 +75,7 @@ func (t *Token) IsTokenValid(token string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if dbToken[tokenName] == token {
+	if string(dbToken[tokenName]) == token {
 		return true, nil
 	}
 

@@ -23,6 +23,7 @@ func init() {
 			beego.NSNamespace("/twostepauth",
 				beego.NSRouter("/enable", &controllers.TwoStepAuthController{}, "get:Enable"),
 				beego.NSRouter("/auth", &controllers.TwoStepAuthController{}, "post:Auth"),
+				beego.NSRouter("/disable", &controllers.TwoStepAuthController{}, "get:Disable"),
 			),
 		),
 	)
