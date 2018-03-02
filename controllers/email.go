@@ -36,7 +36,7 @@ func (e *EmailController) SendMail() {
 			return
 		}
 		defer f.Close()
-		attachFilename = path.Join(uploadPath, h.Filename)
+		attachFilename = path.Join(common.UploadPath, h.Filename)
 		e.SaveToFile("attach", attachFilename)
 	}
 

@@ -20,6 +20,10 @@ func init() {
 			beego.NSNamespace("/md5",
 				beego.NSRouter("", &controllers.MD5Controller{}),
 			),
+			beego.NSNamespace("/twostepauth",
+				beego.NSRouter("/enable", &controllers.TwoStepAuthController{}, "get:Enable"),
+				beego.NSRouter("/auth", &controllers.TwoStepAuthController{}, "post:Auth"),
+			),
 		),
 	)
 	beego.AddNamespace(apins)

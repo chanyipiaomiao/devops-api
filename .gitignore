@@ -27,3 +27,5 @@ upload
 *.db
 data
 logs
+static
+keys

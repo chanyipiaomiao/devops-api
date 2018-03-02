@@ -2,17 +2,11 @@ package controllers
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/astaxie/beego"
-	"github.com/chanyipiaomiao/hltool"
 	"github.com/satori/go.uuid"
 
 	"devops-api/common"
-)
-
-var (
-	uploadPath string
 )
 
 // BaseController 基础控制器
@@ -117,12 +111,7 @@ type VersionController struct {
 	BaseController
 }
 
-func init() {
-
-	// 上传目录是否存在
-	uploadPath = beego.AppConfig.String("uploadDir")
-	if !hltool.IsExist(uploadPath) {
-		os.MkdirAll(uploadPath, os.ModePerm)
-		os.Create(uploadPath)
-	}
+// TwoStepAuthController 二步验证控制器
+type TwoStepAuthController struct {
+	BaseController
 }

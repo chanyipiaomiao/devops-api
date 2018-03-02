@@ -8,11 +8,11 @@ import (
 )
 
 var (
-	// dbPath 数据库文件路径
-	dbPath = beego.AppConfig.String("database::dbPath")
 
-	db *hltool.BoltDB
+	// boltdb db操作对象
+	tokenDb *hltool.BoltDB
 
+	// jwt 签名字符串
 	signString string
 )
 
@@ -28,7 +28,7 @@ type Token struct{}
 // NewToken 返回Token对象
 func NewToken() (*Token, error) {
 	var err error
-	db, err = hltool.NewBoltDB(dbPath, tokenTableName)
+	tokenDb, err = hltool.NewBoltDB(DBPath, tokenTableName)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func NewToken() (*Token, error) {
 
 // GetToken 根据name获取token
 func (t *Token) GetToken(name string) (map[string]string, error) {
-	result, err := db.Get([]string{name})
+	result, err := tokenDb.Get([]string{name})
 	if err != nil {
 		return nil, fmt.Errorf("get token < %s > error: %s", name, err)
 	}
@@ -110,7 +110,7 @@ func (t *Token) DeleteToken(rootToken, name string) error {
 
 	r, err := t.IsExistToken(name)
 	if r {
-		err = db.Delete([]string{name})
+		err = tokenDb.Delete([]string{name})
 		if err != nil {
 			return fmt.Errorf("delete token < %s > error: %s", name, err)
 		}
@@ -147,7 +147,7 @@ func (t *Token) AddToken(rootToken, name string) error {
 		return err
 	}
 
-	db.Set(map[string][]byte{
+	tokenDb.Set(map[string][]byte{
 		name: []byte(token),
 	})
 
