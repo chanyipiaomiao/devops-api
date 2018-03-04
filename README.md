@@ -88,7 +88,11 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 4. 启动服务
 
 ```sh
-./devops-api server 
+./devops-api server --mode=prod
+
+--mode 指定程序运行模式, prod: 生产模式 dev: 开发模式, 默认是开发模式
+
+也可以在配置文件app.conf中修改 runmode=prod 也可以设置为生产模式
 ```
 
 ```sh
