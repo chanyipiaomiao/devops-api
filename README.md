@@ -4,6 +4,7 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 
 # 主要功能
 
+- 2步验证(Google Authenticator验证)
 - 发送邮件
 - 生成随机密码
 - 获取字符串的MD5值
@@ -15,6 +16,10 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 - [安装使用](#安装使用)
 - [依赖](#依赖)
 - [功能列表](#功能列表)
+	- [2步验证](#2步验证)
+		- [启用2步验证](#启用2步验证)
+		- [验证6位数字](#验证google-authenticator或是其他的类似的app生成的6位数字)
+		- [禁用2步验证](#禁用2步验证)
 	- [发送邮件](#发送邮件)
 		- [api接口](#发送邮件api接口)
 		- [Curl 示例](#curl-示例)
@@ -47,7 +52,7 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 
 ## 使用
 
-**注意: 如果配置文件app.conf中, security->enableToken 的值是 false, 可以跳过 步骤2 和 步骤3, 默认为true**
+**注意: 如果配置文件app.conf中, security->enableToken 的值是 false, 可以跳过 步骤2 和 步骤3, 默认为true, 如果是false 可以不用在请求头里面添加 DEVOPS-API-TOKEN 头**
 
 
 1. 自定义配置(**该步骤可选**)
@@ -62,11 +67,11 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 
 2. 首先初始化, 会生成root token，该root token 管理其他的token(**该步骤可选**)
 
-```shell
+```sh
 ./devops-api init
 ```
 
-```shell
+```sh
 注意: 忘记root token, 可以使用以下重新生成
 
 ./devops-api init --refresh-root-token
@@ -74,7 +79,7 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 
 3. 使用root token 生成普通的token，用于验证请求(**该步骤可选**)
 
-```shell
+```sh
 ./devops-api token --create=名称 --root-token=上边的root token
 
 注意：忘记token，重新生成即可
@@ -82,11 +87,11 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 
 4. 启动服务
 
-```shell
+```sh
 ./devops-api server 
 ```
 
-```shell
+```sh
 使用生成token就能愉快的访问API了
 
 注意: token必须放到请求头里面,名称必须是: DEVOPS-API-TOKEN
@@ -94,7 +99,7 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 
 5. 获取帮助
 
-```shell
+```sh
 ./devops-api --help
 ```
 
@@ -108,17 +113,94 @@ go get github.com/robfig/cron
 go get github.com/chanyipiaomiao/hltool
 go get gopkg.in/alecthomas/kingpin.v2
 go get -u github.com/satori/go.uuid
+go get github.com/sec51/twofactor
 ```
 
 [返回到目录](#目录)
 
 # API
 
+## 2步验证
+
+### 2步验证api接口
+
+#### 启用2步验证
+
+```sh
+GET /api/v1/twostepauth/enable?username=用户名&issuer=发行者
+
+username email或者是用户名
+issuer 可以是比如 公司的域名/公司的代号等
+```
+返回结果:
+
+```sh
+{
+    "enable": true,
+    "key": "656C7AAU556TAMNONWZXLPEYTCXR3QE2",
+    "qrImage": "/static/download/qr/lei.he.png",
+    "requestId": "ee3145bf-c329-4830-947b-69ef74a269f5",
+    "statuscode": 0
+}
+
+enable 		启用成功
+qrImage 	2步验证 二维码图片路径
+key     	没办法扫描二维码时可以手动添加
+statuscode  	返回0,代表成功,其他失败 
+```
+
+[返回到目录](#目录)
+
+#### 验证Google Authenticator或是其他的类似的APP生成的6位数字
+
+```sh
+POST /api/v1/twostepauth/auth
+
+username: 用户名
+issuer:   发行者
+token:    6位数字的验证码
+```
+返回结果:
+
+```sh
+{
+    "auth": true,
+    "requestId": "2f9aa9b5-2c02-4c7f-af4e-3c1d931eb7aa",
+    "statuscode": 0,
+    "username": "lei.he"
+}
+
+auth: 验证成功true, 不成功false
+```
+
+[返回到目录](#目录)
+
+#### 禁用2步验证
+
+```sh
+GET /api/v1/twostepauth/disable?username=用户名
+```
+
+返回结果:
+
+```sh
+{
+    "disable": true,
+    "requestId": "4f73c93c-ae99-4582-81b1-81ce75133599",
+    "statuscode": 0,
+    "username": "lei.he"
+}
+
+disable 禁用成功,删除二维码图片,从数据库中删除该用户
+```
+
+[返回到目录](#目录)
+
 ## 发送邮件 
 
 #### 发送邮件api接口
 
-```shell
+```sh
 POST /api/v1/sendmail
 ```
 
@@ -135,7 +217,7 @@ POST /api/v1/sendmail
 
 ### Curl 示例
 
-```shell
+```sh
 curl -X POST \
   http://127.0.0.1:8080/api/v1/sendmail \
   -H 'DEVOPS-API-TOKEN: 生成Token' \
@@ -298,7 +380,7 @@ func main() {
 
 #### 生成随机密码api接口
 
-```shell
+```sh
 GET /api/v1/password/generation
 ```
 
@@ -312,7 +394,7 @@ GET /api/v1/password/generation
 
 ### Curl 示例
 
-```shell
+```sh
 curl http://127.0.0.1:8080/api/v1/password/generation?length=64 \
   -H 'DEVOPS-API-TOKEN: 生成的Token'
 ```
@@ -323,19 +405,19 @@ curl http://127.0.0.1:8080/api/v1/password/generation?length=64 \
 
 #### 首先设置一下环境变量
 
-```shell
+```sh
 export DEVOPS_API_TOKEN=生成的Token
 ```
 
 Linux
 
-```shell
+```sh
 alias genpwd="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation?length=64;echo"
 alias genpwdspecial="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation?length=64&specialChar=yes;echo"
 ```
 Mac 可能需要把?=&转义一下
 
-```shell
+```sh
 alias genpwd="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation\?length\=64;echo"
 alias genpwdspecial="curl -H \"DEVOPS-API-TOKEN: ${DEVOPS_API_TOKEN}\" http://127.0.0.1:8080/api/v1/password/generation\?length\=64\&specialChar\=yes;echo"
 ```
@@ -403,7 +485,7 @@ func main() {
 
 ### 获取字符串的MD5值api接口
 
-```shell
+```sh
 GET /api/v1/md5?string=123456
 ```
 
@@ -418,7 +500,7 @@ GET /api/v1/md5?string=123456
 
 #### 生成验证密码api接口
 
-```shell
+```sh
 GET /api/v1/password/manualGenAuthPassword
 ```
 
@@ -428,7 +510,7 @@ GET /api/v1/password/manualGenAuthPassword
 
 #### 验证密码api接口
 
-```shell
+```sh
 POST /api/v1/password/authPassword
 ```
 
@@ -440,7 +522,7 @@ POST /api/v1/password/authPassword
 
 #### 获取程序自身版本信息api接口
 
-```shell
+```sh
 GET /version  
 ```
 
