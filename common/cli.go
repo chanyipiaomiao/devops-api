@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/astaxie/beego"
+	"github.com/chanyipiaomiao/hltool"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -16,6 +17,7 @@ var (
 	refreshRootToken = inits.Flag("refresh-root-token", "refresh root token").Bool()
 	server           = app.Command("server", "Server mode")
 	logPath          = server.Flag("log", "Log Path, In Configure File, Default: logs/devops-api.log").String()
+	runMode          = server.Flag("mode", "Run Mode: dev|prod|test, In Configure File, Default: dev").String()
 
 	token       = app.Command("token", "Token Manage")
 	tokenRoot   = token.Flag("root-token", "Specify Root Token").Required().String()
@@ -64,6 +66,15 @@ func InitCli() {
 
 		// 初始化日志
 		InitLog()
+
+		// 获取服务运行模式
+		if *runMode != "" {
+			if ok, _ := hltool.InStringSlice([]string{"dev", "prod", "test"}, *runMode); !ok {
+				log.Fatalln("run mode input error. mode: dev|prod|test")
+			}
+
+			beego.BConfig.RunMode = *runMode
+		}
 		beego.Run()
 
 	case "token":
