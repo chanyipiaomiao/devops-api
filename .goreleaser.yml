@@ -14,9 +14,9 @@ builds:
     goarch:
       - amd64
       - 386
-  - ldflags: -s -w -X devops-api/common.BuildDate={{.Date}} -X devops-api/common.CommitHash={{.Commit}} -X devops-api/common.AppVersion={{.Version}} -X devops-api/common.GoVersion={{.Env.GO_VERSION}}
-  env:
+    env:
       - CGO_ENABLED=0
+    ldflags: -s -w -X devops-api/common.BuildDate={{.Date}} -X devops-api/common.CommitHash={{.Commit}} -X devops-api/common.AppVersion={{.Version}} -X devops-api/common.GoVersion={{.Env.GO_VERSION}}
 archive:
   format: tar.gz
   wrap_in_directory: true
