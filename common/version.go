@@ -2,7 +2,7 @@ package common
 
 var (
 	// GoVersion Go版本
-	GoVersion = "go1.9.4"
+	GoVersion = "go1.10"
 
 	// AppName 程序名称
 	AppName = "devops-api"
@@ -17,7 +17,7 @@ var (
 	CommitHash = ""
 
 	// BuildDate 编译日期
-	BuildDate = "2018-02-27"
+	BuildDate = "2018-03-05"
 
 	// Author 作者
 	Author = "helei"
