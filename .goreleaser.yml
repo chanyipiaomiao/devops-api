@@ -24,7 +24,7 @@ archive:
   files:
     - LICENSE
     - README.md
-    - conf/*
+    - conf
   format_overrides:
     - goos: windows
       format: zip
