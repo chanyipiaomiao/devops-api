@@ -107,6 +107,12 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 ./devops-api --help
 ```
 
+6. 备份数据库文件
+
+```sh
+./devops-api backup --filepath=备份文件路径
+```
+
 [返回到目录](#目录)
 
 # 依赖

@@ -23,6 +23,9 @@ var (
 	tokenRoot   = token.Flag("root-token", "Specify Root Token").Required().String()
 	tokenCreate = token.Flag("create", "Create a Token, Special a Name").String()
 	tokenDelete = token.Flag("delete", "Delete a Token, Special a Name").String()
+
+	backup   = app.Command("backup", "Backup BoltDB DB File")
+	filepath = backup.Flag("filepath", "Special Backup FilePath").String()
 )
 
 // InitCli 初始化命令行参数
@@ -47,6 +50,14 @@ func InitCli() {
 		}
 		if err != nil {
 			log.Fatalf("%s\n", err)
+		}
+
+	case "backup":
+		if *filepath != "" {
+			err := BackupBoltDB(*filepath)
+			if err != nil {
+				log.Fatalf("%s\n", err)
+			}
 		}
 
 	case "server":
