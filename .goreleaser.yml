@@ -3,6 +3,7 @@ release:
     owner: chanyipiaomiao
     name: devops-api
   name_template: '{{.Tag}}'
+  draft: true
 builds:
   - main: main.go
     binary: devops-api
@@ -24,7 +25,7 @@ archive:
   files:
     - LICENSE
     - README.md
-    - conf
+    - conf/*.conf
   format_overrides:
     - goos: windows
       format: zip
