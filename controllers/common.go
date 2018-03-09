@@ -115,7 +115,7 @@ type TwoStepAuthController struct {
 	BaseController
 }
 
-// ManagePasswordController 密码管理
-type ManagePasswordController struct {
+// StorePasswordController 密码管理
+type StorePasswordController struct {
 	BaseController
 }

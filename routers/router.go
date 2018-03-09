@@ -25,9 +25,10 @@ func init() {
 				beego.NSRouter("/auth", &controllers.TwoStepAuthController{}, "post:Auth"),
 				beego.NSRouter("/disable", &controllers.TwoStepAuthController{}, "get:Disable"),
 			),
-			beego.NSNamespace("/managePassword",
-				beego.NSRouter("/update", &controllers.ManagePassword{}, "post:Update"),
-				beego.NSRouter("/delete", &controllers.ManagePassword{}, "post:Delete"),
+			beego.NSNamespace("/storepass",
+				beego.NSRouter("/update", &controllers.StorePasswordController{}, "post:Update"),
+				beego.NSRouter("/delete", &controllers.StorePasswordController{}, "get:Delete"),
+				beego.NSRouter("/get", &controllers.StorePasswordController{}, "get:Get"),
 			),
 		),
 	)

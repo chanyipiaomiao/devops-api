@@ -14,11 +14,6 @@ const (
 	manPassTable = "password"
 )
 
-var (
-	// 密码加密字符串
-	crytoString string
-)
-
 // JSONManPassFields 通过POST传递过来的json字符串结构
 type JSONManPassFields struct {
 	Password []struct {
@@ -82,7 +77,7 @@ func (m *ManagePassword) Update(reqbody []byte) error {
 	}
 
 	// 先根据唯一标识从数据库获取一下，看看其值是否存在
-	result, err := m.Get([]string{passwordFields.UniqueID})
+	result, err := m.get([]string{passwordFields.UniqueID})
 	if err != nil {
 		return err
 	}
@@ -106,11 +101,35 @@ func (m *ManagePassword) Update(reqbody []byte) error {
 	return m.save(passwordFields.UniqueID, inDBpassword)
 }
 
-// Get 根据唯一标识获取值,如果数组中所有的标识在数据库都没有值,就返回一个空的map
-func (m *ManagePassword) Get(uniqueIDs []string) (map[string][]byte, error) {
+// get 数据库中根据id查询
+func (m *ManagePassword) get(uniqueIDs []string) (map[string][]byte, error) {
 	r, err := m.DB.Get(uniqueIDs)
 	if err != nil {
 		return nil, err
+	}
+	return r, nil
+}
+
+// Get 根据唯一标识获取值,如果数组中所有的标识在数据库都没有值,就返回一个空的map
+func (m *ManagePassword) Get(uniqueIDs []string) (map[string]interface{}, error) {
+	result, err := m.get(uniqueIDs)
+	if err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return map[string]interface{}{}, nil
+	}
+	r := make(map[string]interface{})
+	for _, id := range uniqueIDs {
+		if _, ok := result[id]; !ok {
+			r[id] = map[string]interface{}{}
+			continue
+		}
+		inDBpassword, err := m.Jwt.ParseJWToken(string(result[id]))
+		if err != nil {
+			continue
+		}
+		r[id] = inDBpassword
 	}
 	return r, nil
 }
