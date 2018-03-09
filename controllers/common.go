@@ -115,3 +115,8 @@ type VersionController struct {
 type TwoStepAuthController struct {
 	BaseController
 }
+
+// ManagePasswordController 密码管理
+type ManagePasswordController struct {
+	BaseController
+}

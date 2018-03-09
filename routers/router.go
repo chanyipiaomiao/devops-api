@@ -25,6 +25,10 @@ func init() {
 				beego.NSRouter("/auth", &controllers.TwoStepAuthController{}, "post:Auth"),
 				beego.NSRouter("/disable", &controllers.TwoStepAuthController{}, "get:Disable"),
 			),
+			beego.NSNamespace("/managePassword",
+				beego.NSRouter("/update", &controllers.ManagePassword{}, "post:Update"),
+				beego.NSRouter("/delete", &controllers.ManagePassword{}, "post:Delete"),
+			),
 		),
 	)
 	beego.AddNamespace(apins)
