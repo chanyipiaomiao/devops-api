@@ -20,11 +20,15 @@ func (m *StorePasswordController) Update() {
 	logger := common.GetLogger()
 	if err != nil {
 		logger.Error(storePasswordCommonFields, fmt.Sprintf("error: %s", err))
+		m.Data["json"] = map[string]interface{}{"error": fmt.Sprintf("error: %s", err), "requestID": reqID, "statuscode": 1}
+		m.ServeJSON()
 		return
 	}
 	err = man.Update(m.Ctx.Input.RequestBody)
 	if err != nil {
 		logger.Error(storePasswordCommonFields, fmt.Sprintf("error: %s", err))
+		m.Data["json"] = map[string]interface{}{"error": fmt.Sprintf("error: %s", err), "requestID": reqID, "statuscode": 1}
+		m.ServeJSON()
 		return
 	}
 	logger.Info(storePasswordCommonFields, fmt.Sprintf("IP: %s, 更新密码成功.", m.Data["RemoteIP"]))
