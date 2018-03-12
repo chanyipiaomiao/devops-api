@@ -56,6 +56,10 @@ func (t *Token) IsExistToken(name string) (bool, error) {
 		return false, err
 	}
 
+	if _, ok := result[name]; !ok {
+		return false, nil
+	}
+
 	if string(result[name]) != "" {
 		return true, fmt.Errorf("exist < %s > token", name)
 	}
@@ -74,6 +78,9 @@ func (t *Token) IsTokenValid(token string) (bool, error) {
 	dbToken, err := t.GetToken(tokenName)
 	if err != nil {
 		return false, err
+	}
+	if _, ok := dbToken[tokenName]; !ok {
+		return false, nil
 	}
 	if string(dbToken[tokenName]) == token {
 		return true, nil

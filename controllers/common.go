@@ -73,9 +73,8 @@ func (b *BaseController) Prepare() {
 			b.StopRun()
 		}
 		if isroot {
-			warn := "can't use root token"
-			common.GetLogger().Error(logFields, warn)
-			b.Data["json"] = map[string]string{"result": warn, "statuscode": "1"}
+			common.GetLogger().Error(logFields, "can't use root token")
+			b.Data["json"] = map[string]string{"result": "DEVOPS-API-TOKEN auth fail", "statuscode": "1"}
 			b.ServeJSON()
 			b.StopRun()
 		}
@@ -113,5 +112,10 @@ type VersionController struct {
 
 // TwoStepAuthController 二步验证控制器
 type TwoStepAuthController struct {
+	BaseController
+}
+
+// StorePasswordController 密码管理
+type StorePasswordController struct {
 	BaseController
 }
