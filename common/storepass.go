@@ -31,7 +31,7 @@ type ManagePassword struct {
 
 // NewManagePassword 返回对象
 func NewManagePassword() (*ManagePassword, error) {
-	passwordDb, err := hltool.NewBoltDB(DBPath, tokenTableName)
+	passwordDb, err := hltool.NewBoltDB(DBPath, manPassTable)
 	if err != nil {
 		return nil, err
 	}
