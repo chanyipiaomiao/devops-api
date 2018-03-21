@@ -1,28 +1,24 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/astaxie/beego"
 	weixin "github.com/chanyipiaomiao/weixin-kit"
 )
 
 var (
 	corpID            = beego.AppConfig.String("weixin::corpID")
-	appSecret         = beego.AppConfig.String("weixin::appSecret")
+	appSecret         = beego.AppConfig.String("weixin::warningAppSecret")
 	accessTokenAPI    = beego.AppConfig.String("weixin::accessTokenAPI")
 	sendMessageAPIURL = beego.AppConfig.String("weixin::sendMessageAPIURL")
 )
 
 // SendWeixinMessage 发送消息
-func SendWeixinMessage(msgType, text, toTag, toUser, toParty string, agentIDFromReq int64) (bool, error) {
-	var agentID int64
-	if agentIDFromReq == 0 {
-		agentIDFromConf, err := beego.AppConfig.Int64("weixin::agentID")
-		if err != nil {
-			return false, err
-		}
-		agentID = agentIDFromConf
-	} else {
-		agentID = agentIDFromReq
+func SendWeixinMessage(msgType, text, toTag, toUser, toParty string) (bool, error) {
+	agentID, err := beego.AppConfig.Int64("weixin::warningAppAgentID")
+	if err != nil {
+		return false, fmt.Errorf("get agentID from app.conf error: %s ", err)
 	}
 
 	message := &weixin.Message{
@@ -44,7 +40,7 @@ func SendWeixinMessage(msgType, text, toTag, toUser, toParty string, agentIDFrom
 		CorpSecret:     appSecret,
 		Message:        message,
 	}
-	_, err := client.SendMessage()
+	_, err = client.SendMessage()
 	if err != nil {
 		return false, err
 	}
