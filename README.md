@@ -5,6 +5,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 # 主要功能
 
 - 微信报警
+- 发送钉钉报警
 - 2步验证(Google Authenticator验证)
 - 密码存储
 - 发送邮件
@@ -19,7 +20,9 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 - [依赖](#依赖)
 - [功能列表](#功能列表)
 	- [微信报警](#微信报警)
-		- [发送消息](#发送消息)
+		- [发送微信消息](#发送微信消息)
+	- [钉钉报警](#钉钉报警)
+		- [发送钉钉消息](#发送钉钉消息)
 	- [2步验证](#2步验证)
 		- [启用2步验证](#启用2步验证)
 		- [验证6位数字](#验证google-authenticator或是其他的类似的app生成的6位数字)
@@ -73,6 +76,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 	- 配置是否启用token验证
 	- 配置jwt token签名字符串,请自行生成修改
 	- 配置微信报警的配置, corpID、warningAppAgentID、warningAppSecret,可参考文档[设置微信报警流程](/doc/weixin.md)
+	- 配置钉钉机器人的URL(**可选**)
 
 2. 首先初始化, 会生成root token，该root token 管理其他的token(**该步骤可选**)
 
@@ -152,7 +156,7 @@ go get github.com/chanyipiaomiao/weixin-kit
 这3个参数可以在企业微信后台管理页面可以看到，详情可以查看上面的文档。
 
 
-#### 发送消息
+#### 发送微信消息
 
 ```sh
 POST /api/v1/sendmsg/weixin
@@ -163,6 +167,25 @@ toUser： 用户ID 		在企业微信后台可以查看到
 toParty: 部门ID 		在企业微信后台可以查看到
 text：   要发送的文本消息
 ```
+
+[返回到目录](#目录)
+
+## 钉钉报警
+
+需要在conf/app.conf 配置钉钉机器人的URL，或者是在POST中传递url参数指定钉钉机器人地址
+
+#### 发送钉钉消息
+
+```sh
+POST /api/v1/sendmsg/dingding
+
+msgType： text|markdown
+msg:      要发送的消息
+title:    发送markdown消息时需要指定此参数，指定标题
+url:      可以指定钉钉机器人的URL，这样就不用在conf/app.conf 配置钉钉机器人的URL
+```
+
+注意: 在发送markdown消息时，markdown的语法可以查看[官方文档](https://open-doc.dingtalk.com/docs/doc.htm?spm=a219a.7629140.0.0.xuaZtG&treeId=257&articleId=105735&docType=1#s2)
 
 [返回到目录](#目录)
 

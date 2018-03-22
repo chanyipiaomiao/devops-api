@@ -105,7 +105,7 @@ type EmailController struct {
 	BaseController
 }
 
-// VersionController 密码管理控制器
+// VersionController 程序自身版本管理控制器
 type VersionController struct {
 	BaseController
 }
@@ -115,12 +115,17 @@ type TwoStepAuthController struct {
 	BaseController
 }
 
-// StorePasswordController 密码管理
+// StorePasswordController 密码管理控制器
 type StorePasswordController struct {
 	BaseController
 }
 
-// WeixinController 发送微信消息管理
+// WeixinController 发送微信消息控制器
 type WeixinController struct {
+	BaseController
+}
+
+// DingdingController 发送钉钉消息控制器
+type DingdingController struct {
 	BaseController
 }

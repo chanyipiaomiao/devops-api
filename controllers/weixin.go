@@ -11,14 +11,14 @@ func (w *WeixinController) SendMessage() {
 	toTag := w.GetString("toTag")
 	toUser := w.GetString("toUser")
 	toParty := w.GetString("toParty")
-	text := w.GetString("text")
+	msg := w.GetString("msg")
 
 	requestID := w.Data["RequestID"].(string)
 	sendWeixinMessageLog := map[string]interface{}{
 		"entryType": "SendWeixinMessage",
 		"requestId": requestID,
 	}
-	_, err := common.SendWeixinMessage(msgType, text, toTag, toUser, toParty)
+	_, err := common.SendWeixinMessage(msgType, msg, toTag, toUser, toParty)
 	if err != nil {
 		sendWeixinMessageLog["statuscode"] = 1
 		sendWeixinMessageLog["errmsg"] = fmt.Sprintf("%s", err)
@@ -30,7 +30,7 @@ func (w *WeixinController) SendMessage() {
 	sendWeixinMessageLog["statuscode"] = 0
 	sendWeixinMessageLog["errmsg"] = ""
 	sendWeixinMessageLog["result"] = "发送成功"
-	common.GetLogger().Info(sendWeixinMessageLog, text)
+	common.GetLogger().Info(sendWeixinMessageLog, msg)
 	w.Data["json"] = sendWeixinMessageLog
 	w.ServeJSON()
 	return

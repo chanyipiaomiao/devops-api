@@ -8,9 +8,20 @@ import (
 )
 
 // SendByDingTalkRobot 通过钉钉发送消息通知
-func SendByDingTalkRobot(messageType string, message string) (bool, error) {
-	url := beego.AppConfig.String("dingTalkRobot")
-	dingtalk := hltool.NewDingTalkClient(url, message, "text")
+func SendByDingTalkRobot(messageType, message, title, robotURL string) (bool, error) {
+	var url string
+	if robotURL == "" {
+		url = beego.AppConfig.String("dingTalkRobot")
+	}
+	url = robotURL
+	dingtalk := &hltool.DingTalkClient{
+		RobotURL: url,
+		Message: &hltool.DingTalkMessage{
+			Type:    messageType,
+			Message: message,
+			Title:   title,
+		},
+	}
 	ok, err := hltool.SendMessage(dingtalk)
 	if err != nil {
 		dingFields := map[string]interface{}{
