@@ -119,3 +119,8 @@ type TwoStepAuthController struct {
 type StorePasswordController struct {
 	BaseController
 }
+
+// WeixinController 发送微信消息管理
+type WeixinController struct {
+	BaseController
+}
