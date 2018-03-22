@@ -142,7 +142,7 @@ go get github.com/chanyipiaomiao/weixin-kit
 
 ## 微信报警
 
-点击查看设置[微信报警流程](/doc/weixin.md)
+点击查看设置[微信报警流程](/doc/weixin.md)
 
 还需要在 conf/app.conf 中配置已下3个参数
 - corpID 				公司或者组织的ID
