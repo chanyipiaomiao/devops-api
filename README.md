@@ -1,9 +1,10 @@
 # devops-api
 
-Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使用
+Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，方便使用
 
 # 主要功能
 
+- 微信报警
 - 2步验证(Google Authenticator验证)
 - 密码存储
 - 发送邮件
@@ -17,6 +18,8 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 - [安装使用](#安装使用)
 - [依赖](#依赖)
 - [功能列表](#功能列表)
+	- [微信报警](#微信报警)
+		- [发送消息](#发送消息)
 	- [2步验证](#2步验证)
 		- [启用2步验证](#启用2步验证)
 		- [验证6位数字](#验证google-authenticator或是其他的类似的app生成的6位数字)
@@ -69,6 +72,7 @@ Golang + Beego编写, 提供一些运维常见操作的 http 接口，方便使�
 	- 配置邮箱地址、端口、用户名、密码
 	- 配置是否启用token验证
 	- 配置jwt token签名字符串,请自行生成修改
+	- 配置微信报警的配置, corpID、warningAppAgentID、warningAppSecret,可参考文档[设置微信报警流程](/doc/weixin.md)
 
 2. 首先初始化, 会生成root token，该root token 管理其他的token(**该步骤可选**)
 
@@ -127,13 +131,40 @@ go get github.com/astaxie/beego
 go get github.com/robfig/cron
 go get github.com/chanyipiaomiao/hltool
 go get gopkg.in/alecthomas/kingpin.v2
-go get -u github.com/satori/go.uuid
+go get github.com/satori/go.uuid
 go get github.com/sec51/twofactor
+go get github.com/chanyipiaomiao/weixin-kit
 ```
 
 [返回到目录](#目录)
 
 # API
+
+## 微信报警
+
+点击查看设置[微信报警流程](/doc/weixin.md)
+
+还需要在 conf/app.conf 中配置已下3个参数
+- corpID 				公司或者组织的ID
+- warningAppAgentID		报警应用的ID
+- warningAppSecret    	报警应用的密钥
+
+这3个参数可以在企业微信后台管理页面可以看到，详情可以查看上面的文档。
+
+
+#### 发送消息
+
+```sh
+POST /api/v1/sendmsg/weixin
+
+msgType: text 		消息类型,目前只支持文本消息
+toTag:   标签ID 		在企业微信后台可以查看到
+toUser： 用户ID 		在企业微信后台可以查看到
+toParty: 部门ID 		在企业微信后台可以查看到
+text：   要发送的文本消息
+```
+
+[返回到目录](#目录)
 
 ## 2步验证
 
@@ -300,7 +331,7 @@ GET /api/v1/storepass/delete?id=10.10.1.2,1.1.1.1
 #### 发送邮件api接口
 
 ```sh
-POST /api/v1/sendmail
+POST /api/v1/sendmsg/mail
 ```
 
 - DEVOPS-API-TOKEN 指定API-TOKEN
@@ -318,7 +349,7 @@ POST /api/v1/sendmail
 
 ```sh
 curl -X POST \
-  http://127.0.0.1:8080/api/v1/sendmail \
+  http://127.0.0.1:8080/api/v1/sendmsg/mail \
   -H 'DEVOPS-API-TOKEN: 生成Token' \
   -H 'content-type: multipart/form-data' \
   -F subject=haha \
@@ -342,7 +373,7 @@ pip install requests
 ```python
 import requests
 
-url = "http://127.0.0.1:8080/api/v1/sendmail"
+url = "http://127.0.0.1:8080/api/v1/sendmsg/mail"
 token = "生成的Token"
 headers = {'DEVOPS-API-TOKEN': token}
 payload = {
@@ -362,7 +393,7 @@ print(response.json())
 ```python
 import requests
 
-url = "http://127.0.0.1:8080/api/v1/sendmail"
+url = "http://127.0.0.1:8080/api/v1/sendmsg/mail"
 token = "生成的Token"
 payload = {
     "subject": u"测试邮件",
@@ -398,7 +429,7 @@ import (
 )
 
 func main() {
-	url := "http://127.0.0.1:8080/api/v1/sendmail"
+	url := "http://127.0.0.1:8080/api/v1/sendmsg/mail"
 	token := "生成的Token"
 	o := &grequests.RequestOptions{
 		Headers: map[string]string{
@@ -436,7 +467,7 @@ import (
 )
 
 func main() {
-	url := "http://127.0.0.1:8080/api/v1/sendmail"
+	url := "http://127.0.0.1:8080/api/v1/sendmsg/mail"
 	token := "生成的token"
 
 	fd, err := os.Open("文件路径")
