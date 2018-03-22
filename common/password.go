@@ -26,7 +26,7 @@ func GenPassword() map[string]bool {
 	sendResult := make(chan bool)
 	if ok, _ := beego.AppConfig.Bool("authpassword::enableDingtalkReciveGenPassword"); ok {
 		go func(ch chan bool, messageType, message string) {
-			ok, _ := SendByDingTalkRobot(messageType, message)
+			ok, _ := SendByDingTalkRobot(messageType, message, "", "")
 			ch <- ok
 		}(sendResult, "text", info)
 	}
