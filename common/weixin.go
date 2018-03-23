@@ -15,7 +15,7 @@ var (
 )
 
 // SendWeixinMessage 发送消息
-func SendWeixinMessage(msgType, text, toTag, toUser, toParty string) (bool, error) {
+func SendWeixinMessage(msgType, msg, toTag, toUser, toParty string) (bool, error) {
 	agentID, err := beego.AppConfig.Int64("weixin::warningAppAgentID")
 	if err != nil {
 		return false, fmt.Errorf("get agentID from app.conf error: %s ", err)
@@ -29,7 +29,7 @@ func SendWeixinMessage(msgType, text, toTag, toUser, toParty string) (bool, erro
 		AgentID: agentID, // 企业应用的id，整型。可在应用的设置页面查看
 		Safe:    0,       // 表示是否是保密消息，0表示否，1表示是，默认0
 		Text: &weixin.Text{
-			Content: text,
+			Content: msg,
 		},
 	}
 
