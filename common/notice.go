@@ -12,8 +12,10 @@ func SendByDingTalkRobot(messageType, message, title, robotURL string) (bool, er
 	var url string
 	if robotURL == "" {
 		url = beego.AppConfig.String("dingTalkRobot")
+	} else {
+		url = robotURL
 	}
-	url = robotURL
+
 	dingtalk := &hltool.DingTalkClient{
 		RobotURL: url,
 		Message: &hltool.DingTalkMessage{
