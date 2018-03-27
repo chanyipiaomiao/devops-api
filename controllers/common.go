@@ -129,3 +129,8 @@ type WeixinController struct {
 type DingdingController struct {
 	BaseController
 }
+
+// HolidayController 节假日工作日判断
+type HolidayController struct {
+	BaseController
+}
