@@ -2,11 +2,12 @@ package common
 
 import (
 	"encoding/json"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/chanyipiaomiao/cal"
 	"github.com/chanyipiaomiao/hltool"
+	"github.com/tidwall/gjson"
 )
 
 const (
@@ -29,13 +30,13 @@ type ReqHoliday struct {
 // HoliWorkday 节假日和工作日
 type HoliWorkday struct{}
 
-// Setting 保存节假日和工作日设置
-func (h *HoliWorkday) Setting(reqBody []byte) error {
+// 解析工作日节假日json字符串
+func (h *HoliWorkday) parse(jsonstr []byte) (*cal.Calendar, error) {
 
 	r := new(ReqHoliday)
-	err := json.Unmarshal(reqBody, r)
+	err := json.Unmarshal(jsonstr, r)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	calendar := cal.NewCalendar()
@@ -56,19 +57,22 @@ func (h *HoliWorkday) Setting(reqBody []byte) error {
 		t, _ := time.Parse(dateTemplate, v)
 		calendar.AddExtraWorkday(t)
 	}
+	return calendar, nil
+}
+
+// Setting 保存节假日和工作日设置
+func (h *HoliWorkday) Setting(reqBody []byte) error {
 
 	db, err := hltool.NewBoltDB(DBPath, holiworkdayTableName)
 	if err != nil {
 		return err
 	}
 
-	o, err := hltool.StructToBytes(calendar)
-	if err != nil {
-		return err
-	}
+	year := gjson.Get(string(reqBody), "year").String()
 	err = db.Set(map[string][]byte{
-		r.Year: o,
+		year: reqBody,
 	})
+
 	if err != nil {
 		return err
 	}
@@ -78,30 +82,42 @@ func (h *HoliWorkday) Setting(reqBody []byte) error {
 
 // IsHoliWorkday 检查给定的日期是工作日还是节假日
 func (h *HoliWorkday) IsHoliWorkday(date string) (string, error) {
+
 	t, err := time.Parse(dateTemplate, date)
 	if err != nil {
-		fmt.Println("1111")
 		return "", err
 	}
 	db, err := hltool.NewBoltDB(DBPath, holiworkdayTableName)
 	if err != nil {
-		fmt.Println("2222")
 		return "", err
 	}
-	year := string(t.Year())
-	r, err := db.Get([]string{year})
+
+	year := strconv.Itoa(t.Year())
+	result, err := db.Get([]string{year})
 	if err != nil {
-		fmt.Println("3333")
 		return "", err
 	}
-	calendar := &cal.Calendar{}
-	err = hltool.BytesToStruct(r[year], calendar)
+
+	calendar, err := h.parse(result[year])
 	if err != nil {
-		fmt.Println("4444")
 		return "", err
 	}
+
+	if err != nil {
+		return "", err
+	}
+
+	if calendar.IsExtraWorkday(t) {
+		return "workday", nil
+	}
+
 	if calendar.IsWorkday(t) {
 		return "workday", nil
 	}
-	return "holiday", nil
+
+	if calendar.IsHoliday(t) {
+		return "holiday", nil
+	}
+
+	return "weekend", nil
 }
