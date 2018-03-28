@@ -122,7 +122,7 @@ func (t *TwoStepAuth) Enable() (map[string]interface{}, error) {
 				return nil, err
 			}
 		}
-		return nil, fmt.Errorf("%s aleady exist.", t.Username)
+		return nil, fmt.Errorf("%s aleady exist", t.Username)
 	}
 	otp, err = twofactor.NewTOTP(t.Username, t.Issuer, crypto.SHA1, TwoStepAuthDigits)
 	if err != nil {
