@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -57,6 +58,9 @@ func (h *HoliWorkday) parse(jsonstr []byte) (*cal.Calendar, error) {
 		t, _ := time.Parse(dateTemplate, v)
 		calendar.AddExtraWorkday(t)
 	}
+
+	calendar.Observed = cal.ObservedExact
+
 	return calendar, nil
 }
 
@@ -87,22 +91,23 @@ func (h *HoliWorkday) IsHoliWorkday(date string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	db, err := hltool.NewBoltDB(DBPath, holiworkdayTableName)
 	if err != nil {
 		return "", err
 	}
 
 	year := strconv.Itoa(t.Year())
+
 	result, err := db.Get([]string{year})
 	if err != nil {
 		return "", err
 	}
-
-	calendar, err := h.parse(result[year])
-	if err != nil {
-		return "", err
+	if result[year] == nil {
+		return "", fmt.Errorf("%s year holiday setting not in db, please setting", year)
 	}
 
+	calendar, err := h.parse(result[year])
 	if err != nil {
 		return "", err
 	}
