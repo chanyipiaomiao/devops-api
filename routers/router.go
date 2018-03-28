@@ -38,7 +38,7 @@ func init() {
 				beego.NSRouter("/delete", &controllers.StorePasswordController{}, "get:Delete"),
 				beego.NSRouter("/get", &controllers.StorePasswordController{}, "get:Get"),
 			),
-			beego.NSNamespace("/holiday",
+			beego.NSNamespace("/holiworkday",
 				beego.NSRouter("", &controllers.HolidayController{}),
 			),
 		),
