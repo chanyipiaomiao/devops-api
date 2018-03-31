@@ -4,6 +4,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 
 # 主要功能
 
+- IP地址定位
 - 工作日节假日判断
 - 微信报警
 - 钉钉报警
@@ -20,6 +21,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 - [安装使用](#安装使用)
 - [依赖](#依赖)
 - [功能列表](#功能列表)
+    - [IP地址定位](#ip地址定位)
 	- [工作日节假日判断](#工作日节假日判断)
 		- [设置节假日和工作日](#设置节假日和工作日)
 		- [判断给定的日期是节假日/工作日/周末](#判断给定的日期是节假日工作日周末)
@@ -144,11 +146,27 @@ go get github.com/tidwall/gjson
 go get github.com/chanyipiaomiao/hltool
 go get github.com/chanyipiaomiao/weixin-kit
 go get github.com/chanyipiaomiao/cal
+go get github.com/chanyipiaomiao/ip2region/binding/golang
 ```
 
 [返回到目录](#目录)
 
 # API
+
+## IP地址定位
+
+本功能使用了 [狮子的魂](https://gitee.com/lionsoul/ip2region) 项目提供的IP地址数据库.
+
+首先要执行 script 目录下的 gen_ip_region.sh 脚本, 来下载IP地址数据库, 可以定期执行脚本.
+
+
+```sh
+GET /api/v1/queryip?ip=1.1.1.1
+
+ip  要查询的IP地址
+```
+
+[返回到目录](#目录)
 
 ## 工作日节假日判断
 

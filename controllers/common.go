@@ -134,3 +134,8 @@ type DingdingController struct {
 type HolidayController struct {
 	BaseController
 }
+
+// QueryIPController IP地址查询
+type QueryIPController struct {
+	BaseController
+}

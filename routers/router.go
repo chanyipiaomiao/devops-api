@@ -41,6 +41,9 @@ func init() {
 			beego.NSNamespace("/holiworkday",
 				beego.NSRouter("", &controllers.HolidayController{}),
 			),
+			beego.NSNamespace("/queryip",
+				beego.NSRouter("", &controllers.QueryIPController{}),
+			),
 		),
 	)
 	beego.AddNamespace(apins)
