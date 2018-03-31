@@ -166,6 +166,26 @@ GET /api/v1/queryip?ip=1.1.1.1
 ip  要查询的IP地址
 ```
 
+返回: 
+
+```sh
+{
+    "entryType": "query ip",
+    "errmsg": "",
+    "ip": "1.1.1.1",
+    "ipInfo": {
+        "CityId": 0,
+        "Country": "中国",
+        "Region": "0",
+        "Province": "上海",
+        "City": "上海",
+        "ISP": "电信"
+    },
+    "requestID": "474b7bbc-a453-45cd-8d01-03f57de22a44",
+    "statuscode": 0
+}
+```
+
 [返回到目录](#目录)
 
 ## 工作日节假日判断
