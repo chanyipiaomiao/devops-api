@@ -28,6 +28,7 @@ archive:
     - LICENSE
     - README.md
     - conf/*.conf
+    - script/*.sh
   format_overrides:
     - goos: windows
       format: zip
