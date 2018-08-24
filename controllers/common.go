@@ -9,24 +9,75 @@ import (
 	"devops-api/common"
 )
 
-// BaseController 基础控制器
-type BaseController struct {
-	beego.Controller
-}
-
-// Prepare 覆盖Controller的方法
-func (b *BaseController) Prepare() {
-
-	// 获取客户端IP
-	remoteIP := b.Ctx.Input.IP()
-	b.Data["RemoteIP"] = remoteIP
+func getUniqueIDName() string {
 
 	// 从配置文件中获取 RequestID或者TraceID,如果配置文件中没有配置默认就是 RequestId
 	uniqueIDName := beego.AppConfig.String("uniqueIDName")
 	if uniqueIDName == "" {
 		uniqueIDName = "RequestID"
 	}
-	uniqueID := b.Ctx.Input.Header(uniqueIDName)
+	return uniqueIDName
+}
+
+var (
+	UniQueIDName   = getUniqueIDName()
+	NeedTokenError = "need DEVOPS-API-TOKEN header"
+	TokenAuthError = "DEVOPS-API-TOKEN auth fail"
+)
+
+// BaseController 基础控制器
+type BaseController struct {
+	beego.Controller
+}
+
+func (b *BaseController) LogInfo(entryType string, msg map[string]interface{}) {
+	common.GetLogger().Info(msg, entryType)
+}
+
+func (b *BaseController) LogError(entryType string, msg map[string]interface{}) {
+	common.GetLogger().Error(msg, entryType)
+}
+
+func (b *BaseController) json(entryType, errmsg string, statuscode int, data interface{}) {
+	msg := map[string]interface{}{
+		"entryType":  entryType,
+		"requestId":  b.Data[UniQueIDName],
+		"errmsg":     errmsg,
+		"statuscode": statuscode,
+		"data":       data,
+	}
+	b.Data["json"] = msg
+	b.ServeJSON()
+
+	msg["clientIP"] = b.Data["RemoteIP"]
+	msg["token"] = b.Data["token"]
+
+	go func() {
+		if statuscode == 1 {
+			b.LogError(entryType, msg)
+		} else {
+			b.LogInfo(entryType, msg)
+		}
+	}()
+}
+
+func (b *BaseController) JsonError(entryType, errmsg string, data interface{}) {
+	b.json(entryType, errmsg, 1, data)
+}
+
+func (b *BaseController) JsonOK(entryType string, data interface{}) {
+	b.json(entryType, "", 0, data)
+}
+
+type NullStringMap map[string]interface{}
+
+// Prepare 覆盖Controller的方法
+func (b *BaseController) Prepare() {
+
+	// 获取客户端IP
+	b.Data["RemoteIP"] = b.Ctx.Input.IP()
+
+	uniqueID := b.Ctx.Input.Header(UniQueIDName)
 	if uniqueID == "" {
 		uid, err := uuid.NewV4()
 		if err != nil {
@@ -38,7 +89,7 @@ func (b *BaseController) Prepare() {
 			uniqueID = fmt.Sprintf("%s", uid)
 		}
 	}
-	b.Data["RequestID"] = uniqueID
+	b.Data[UniQueIDName] = uniqueID
 
 	// 配置文件文件中启用了token功能,才验证token
 	if common.EnableToken {
@@ -46,44 +97,32 @@ func (b *BaseController) Prepare() {
 		// 获取 DEVOPS-API-TOKEN 头信息
 		token := b.Ctx.Input.Header("DEVOPS-API-TOKEN")
 		if token == "" {
-			b.Data["json"] = map[string]string{"result": "need DEVOPS-API-TOKEN header", "statuscode": "1"}
-			b.ServeJSON()
+			b.JsonError("JWToken Auth", NeedTokenError, NullStringMap{})
 			b.StopRun()
 		}
+		b.Data["token"] = token
 
 		// 验证 DEVOPS-API-TOKEN 是否有效
 		jwtoken, err := common.NewToken()
-		logFields := map[string]interface{}{
-			"entryType": "JWToken Auth",
-			"requestID": b.Data["RequestID"],
-		}
 		if err != nil {
-			common.GetLogger().Error(logFields, fmt.Sprintf("%s", err))
-			b.Data["json"] = map[string]string{"result": "DEVOPS-API-TOKEN auth fail", "statuscode": "1"}
-			b.ServeJSON()
+			b.JsonError("JWToken Auth", TokenAuthError, NullStringMap{})
 			b.StopRun()
 		}
 
 		// 验证是否是root token 不能使用root token
 		isroot, err := jwtoken.IsRootToken(token)
 		if err != nil {
-			common.GetLogger().Error(logFields, fmt.Sprintf("%s", err))
-			b.Data["json"] = map[string]string{"result": "DEVOPS-API-TOKEN auth fail", "statuscode": "1"}
-			b.ServeJSON()
+			b.JsonError("JWToken Auth", TokenAuthError, NullStringMap{})
 			b.StopRun()
 		}
 		if isroot {
-			common.GetLogger().Error(logFields, "can't use root token")
-			b.Data["json"] = map[string]string{"result": "DEVOPS-API-TOKEN auth fail", "statuscode": "1"}
-			b.ServeJSON()
+			b.JsonError("JWToken Auth", fmt.Sprintf("%s", TokenAuthError, "can't use root token"), NullStringMap{})
 			b.StopRun()
 		}
 
 		_, err = jwtoken.IsTokenValid(token)
 		if err != nil {
-			common.GetLogger().Error(logFields, fmt.Sprintf("%s", err))
-			b.Data["json"] = map[string]string{"result": "DEVOPS-API-TOKEN auth fail", "statuscode": "1"}
-			b.ServeJSON()
+			b.JsonError("JWToken Auth", TokenAuthError, NullStringMap{})
 			b.StopRun()
 		}
 	}

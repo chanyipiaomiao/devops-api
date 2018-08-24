@@ -17,10 +17,10 @@ func NewQueryIP(dbPath string) *QueryIP {
 // Query 根据IP查询
 func (q *QueryIP) Query(ip string) (*ip2region.IpInfo, error) {
 	region, err := ip2region.New(q.DBPath)
-	defer region.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer region.Close()
 
 	r, err := region.MemorySearch(ip)
 	if err != nil {

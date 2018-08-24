@@ -7,27 +7,18 @@ import (
 
 // Get Get方法
 func (q *QueryIPController) Get() {
-	requestID := q.Data["RequestID"].(string)
-	queryIPLog := map[string]interface{}{
-		"entryType": "query ip",
-		"requestID": requestID,
-	}
+
 	ip := q.GetString("ip")
 	qip := common.NewQueryIP("data/ip2region.db")
 	r, err := qip.Query(ip)
 	if err != nil {
-		queryIPLog["statuscode"] = 1
-		queryIPLog["errmsg"] = fmt.Sprintf("%s", err)
-		common.GetLogger().Error(queryIPLog, "查询IP地址区域")
-		q.Data["json"] = queryIPLog
-		q.ServeJSON()
+		q.JsonError("query ip", fmt.Sprintf("%s", err), NullStringMap{})
 		return
 	}
-	queryIPLog["statuscode"] = 0
-	queryIPLog["errmsg"] = ""
-	queryIPLog["ip"] = ip
-	queryIPLog["ipInfo"] = r
-	common.GetLogger().Info(queryIPLog, "查询IP地址区域")
-	q.Data["json"] = queryIPLog
-	q.ServeJSON()
+
+	data := map[string]interface{}{
+		"ip":     ip,
+		"ipInfo": r,
+	}
+	q.JsonOK("query ip", data)
 }
