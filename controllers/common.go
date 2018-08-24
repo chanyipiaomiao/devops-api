@@ -25,16 +25,26 @@ var (
 	TokenAuthError = "DEVOPS-API-TOKEN auth fail"
 )
 
+type StringMap map[string]interface{}
+
 // BaseController 基础控制器
 type BaseController struct {
 	beego.Controller
 }
 
-func (b *BaseController) LogInfo(entryType string, msg map[string]interface{}) {
+func (b *BaseController) LogInfo(entryType string, msg StringMap) {
 	common.GetLogger().Info(msg, entryType)
 }
 
-func (b *BaseController) LogError(entryType string, msg map[string]interface{}) {
+func (b *BaseController) LogError(entryType string, msg StringMap) {
+	if _, ok := msg["requestId"]; !ok {
+		msg["requestId"] = b.Data[UniQueIDName]
+	}
+
+	if _, ok := msg["statuscode"]; !ok {
+		msg["statuscode"] = 1
+	}
+
 	common.GetLogger().Error(msg, entryType)
 }
 
@@ -69,8 +79,6 @@ func (b *BaseController) JsonOK(entryType string, data interface{}) {
 	b.json(entryType, "", 0, data)
 }
 
-type NullStringMap map[string]interface{}
-
 // Prepare 覆盖Controller的方法
 func (b *BaseController) Prepare() {
 
@@ -97,7 +105,7 @@ func (b *BaseController) Prepare() {
 		// 获取 DEVOPS-API-TOKEN 头信息
 		token := b.Ctx.Input.Header("DEVOPS-API-TOKEN")
 		if token == "" {
-			b.JsonError("JWToken Auth", NeedTokenError, NullStringMap{})
+			b.JsonError("JWToken Auth", NeedTokenError, StringMap{})
 			b.StopRun()
 		}
 		b.Data["token"] = token
@@ -105,24 +113,24 @@ func (b *BaseController) Prepare() {
 		// 验证 DEVOPS-API-TOKEN 是否有效
 		jwtoken, err := common.NewToken()
 		if err != nil {
-			b.JsonError("JWToken Auth", TokenAuthError, NullStringMap{})
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{})
 			b.StopRun()
 		}
 
 		// 验证是否是root token 不能使用root token
 		isroot, err := jwtoken.IsRootToken(token)
 		if err != nil {
-			b.JsonError("JWToken Auth", TokenAuthError, NullStringMap{})
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{})
 			b.StopRun()
 		}
 		if isroot {
-			b.JsonError("JWToken Auth", fmt.Sprintf("%s", TokenAuthError, "can't use root token"), NullStringMap{})
+			b.JsonError("JWToken Auth", fmt.Sprintf("%s", TokenAuthError, "can't use root token"), StringMap{})
 			b.StopRun()
 		}
 
 		_, err = jwtoken.IsTokenValid(token)
 		if err != nil {
-			b.JsonError("JWToken Auth", TokenAuthError, NullStringMap{})
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{})
 			b.StopRun()
 		}
 	}

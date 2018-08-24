@@ -8,11 +8,11 @@ import (
 // Get Get方法
 func (q *QueryIPController) Get() {
 
-	ip := q.GetString("ip")
+	ip := q.Ctx.Input.Param(":ip")
 	qip := common.NewQueryIP("data/ip2region.db")
 	r, err := qip.Query(ip)
 	if err != nil {
-		q.JsonError("query ip", fmt.Sprintf("%s", err), NullStringMap{})
+		q.JsonError("Query IP", fmt.Sprintf("%s", err), StringMap{})
 		return
 	}
 

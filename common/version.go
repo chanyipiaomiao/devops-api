@@ -8,7 +8,7 @@ var (
 	AppName = "devops-api"
 
 	// AppVersion 程序版本号
-	AppVersion = "0.1.0"
+	AppVersion = "2.0.0"
 
 	// AppDescription 程序描述
 	AppDescription = "happy with devops-api"
@@ -17,7 +17,7 @@ var (
 	CommitHash = ""
 
 	// BuildDate 编译日期
-	BuildDate = "2018-03-05"
+	BuildDate = "2018-08-24"
 
 	// Author 作者
 	Author = "helei"

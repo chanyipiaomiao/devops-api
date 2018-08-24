@@ -6,7 +6,7 @@ import (
 
 // Get 方法
 func (m *MD5Controller) Get() {
-	rawString := m.GetString("string")
+	rawString := m.Ctx.Input.Param(":rawstr")
 	rawStringMD5 := hltool.GetMD5(rawString)
 	data := map[string]string{
 		"rawString":    rawString,
