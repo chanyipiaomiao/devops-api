@@ -6,6 +6,10 @@ import (
 	"devops-api/common"
 )
 
+var (
+	twoStepEntryType = "TwoStepAuth"
+)
+
 // Enable 启用2步验证
 func (t *TwoStepAuthController) Enable() {
 
@@ -16,35 +20,13 @@ func (t *TwoStepAuthController) Enable() {
 	two.Issuer = issuer
 	two.Digits = common.TwoStepAuthDigits
 
-	requestID := t.Data["RequestID"].(string)
-	twoStepAuthLog := map[string]interface{}{
-		"entryType": "TwoStepAuth",
-		"username":  username,
-		"issuer":    issuer,
-		"requestId": requestID,
-	}
-
 	m, err := two.Enable()
 	if err != nil {
-		msg := fmt.Sprintf("%s", err)
-		common.GetLogger().Error(twoStepAuthLog, msg)
-		t.Data["json"] = map[string]interface{}{
-			"requestId":  requestID,
-			"statuscode": 1,
-			"enable":     false,
-			"username":   username,
-			"result":     msg,
-		}
-		t.ServeJSON()
+		t.JsonError(twoStepEntryType,
+			fmt.Sprintf("%s", err), StringMap{"enable": "no", "username": username}, true)
 		return
 	}
-
-	m["enable"] = true
-	m["statuscode"] = 0
-	m["requestId"] = requestID
-	t.Data["json"] = m
-	common.GetLogger().Info(twoStepAuthLog, "启用2步验证")
-	t.ServeJSON()
+	t.JsonOK(twoStepEntryType, m, true)
 }
 
 // Disable 禁用2步验证
@@ -53,32 +35,12 @@ func (t *TwoStepAuthController) Disable() {
 	two := common.NewTwoStepAuth(username)
 	err := two.Disable()
 
-	requestID := t.Data["RequestID"].(string)
-	twoStepAuthLog := map[string]interface{}{
-		"entryType": "TwoStepAuth",
-		"username":  username,
-		"requestId": requestID,
-	}
-
-	result := map[string]interface{}{
-		"requestId": requestID,
-		"username":  username,
-	}
-	t.Data["json"] = result
 	if err != nil {
-		result["statuscode"] = 1
-		result["disable"] = false
-		msg := fmt.Sprintf("%s", err)
-		result["result"] = msg
-		common.GetLogger().Error(twoStepAuthLog, msg)
-		t.ServeJSON()
+		t.JsonError(twoStepEntryType,
+			fmt.Sprintf("%s", err), StringMap{"disable": "no", "username": username}, true)
 		return
 	}
-
-	result["statuscode"] = 0
-	result["disable"] = true
-	common.GetLogger().Info(twoStepAuthLog, "禁用2步验证")
-	t.ServeJSON()
+	t.JsonOK(twoStepEntryType, StringMap{"disable": "yes", "username": username}, true)
 }
 
 // Auth 验证用户输入的6位数字
@@ -92,32 +54,10 @@ func (t *TwoStepAuthController) Auth() {
 	two.Issuer = issuer
 	isok, err := two.Auth(token)
 
-	requestID := t.Data["RequestID"].(string)
-	twoStepAuthLog := map[string]interface{}{
-		"entryType": "TwoStepAuth",
-		"username":  username,
-		"issuer":    issuer,
-		"token":     token,
-		"requestId": requestID,
-	}
-
-	result := map[string]interface{}{
-		"requestId": requestID,
-		"auth":      isok,
-		"username":  username,
-	}
-	t.Data["json"] = result
-
 	if err == nil {
-		result["statuscode"] = 0
-		common.GetLogger().Info(twoStepAuthLog, "验证2步验证")
-		t.ServeJSON()
+		t.JsonOK(twoStepEntryType, StringMap{"username": username, "issuer": issuer, "auth": isok}, true)
 		return
 	}
-	result["statuscode"] = 1
-	msg := fmt.Sprintf("%s", err)
-	result["result"] = msg
-	common.GetLogger().Error(twoStepAuthLog, msg)
-	t.ServeJSON()
-
+	t.JsonError(twoStepEntryType, fmt.Sprintf("%s", err),
+		StringMap{"username": username, "issuer": issuer, "auth": isok}, true)
 }

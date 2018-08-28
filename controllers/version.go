@@ -6,5 +6,5 @@ import (
 
 // Get 获取程序版本号
 func (v *VersionController) Get() {
-	v.JsonOK("Get App Version", common.GetVersion())
+	v.JsonOK("Get App Version", common.GetVersion(), true)
 }

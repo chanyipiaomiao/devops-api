@@ -32,23 +32,38 @@ type BaseController struct {
 	beego.Controller
 }
 
-func (b *BaseController) LogInfo(entryType string, msg StringMap) {
-	common.GetLogger().Info(msg, entryType)
-}
-
-func (b *BaseController) LogError(entryType string, msg StringMap) {
+func (b *BaseController) log(msg StringMap) StringMap {
 	if _, ok := msg["requestId"]; !ok {
 		msg["requestId"] = b.Data[UniQueIDName]
 	}
 
-	if _, ok := msg["statuscode"]; !ok {
-		msg["statuscode"] = 1
+	if _, ok := msg["clientIP"]; !ok {
+		msg["clientIP"] = b.Data["RemoteIP"]
 	}
 
-	common.GetLogger().Error(msg, entryType)
+	if _, ok := msg["token"]; !ok {
+		msg["token"] = b.Data["token"]
+	}
+	return msg
 }
 
-func (b *BaseController) json(entryType, errmsg string, statuscode int, data interface{}) {
+func (b *BaseController) LogInfo(entryType string, msg StringMap) {
+	message := b.log(msg)
+	if _, ok := msg["statuscode"]; !ok {
+		message["statuscode"] = 0
+	}
+	common.GetLogger().Info(message, entryType)
+}
+
+func (b *BaseController) LogError(entryType string, msg StringMap) {
+	message := b.log(msg)
+	if _, ok := msg["statuscode"]; !ok {
+		message["statuscode"] = 1
+	}
+	common.GetLogger().Error(message, entryType)
+}
+
+func (b *BaseController) json(entryType, errmsg string, statuscode int, data interface{}, isLog bool) {
 	msg := map[string]interface{}{
 		"entryType":  entryType,
 		"requestId":  b.Data[UniQueIDName],
@@ -62,21 +77,24 @@ func (b *BaseController) json(entryType, errmsg string, statuscode int, data int
 	msg["clientIP"] = b.Data["RemoteIP"]
 	msg["token"] = b.Data["token"]
 
-	go func() {
-		if statuscode == 1 {
-			b.LogError(entryType, msg)
-		} else {
-			b.LogInfo(entryType, msg)
-		}
-	}()
+	if isLog {
+		go func() {
+			if statuscode == 1 {
+				b.LogError(entryType, msg)
+			} else {
+				b.LogInfo(entryType, msg)
+			}
+		}()
+	}
+
 }
 
-func (b *BaseController) JsonError(entryType, errmsg string, data interface{}) {
-	b.json(entryType, errmsg, 1, data)
+func (b *BaseController) JsonError(entryType, errmsg string, data interface{}, isLog bool) {
+	b.json(entryType, errmsg, 1, data, isLog)
 }
 
-func (b *BaseController) JsonOK(entryType string, data interface{}) {
-	b.json(entryType, "", 0, data)
+func (b *BaseController) JsonOK(entryType string, data interface{}, isLog bool) {
+	b.json(entryType, "", 0, data, isLog)
 }
 
 // Prepare 覆盖Controller的方法
@@ -105,7 +123,7 @@ func (b *BaseController) Prepare() {
 		// 获取 DEVOPS-API-TOKEN 头信息
 		token := b.Ctx.Input.Header("DEVOPS-API-TOKEN")
 		if token == "" {
-			b.JsonError("JWToken Auth", NeedTokenError, StringMap{})
+			b.JsonError("JWToken Auth", NeedTokenError, StringMap{}, true)
 			b.StopRun()
 		}
 		b.Data["token"] = token
@@ -113,24 +131,25 @@ func (b *BaseController) Prepare() {
 		// 验证 DEVOPS-API-TOKEN 是否有效
 		jwtoken, err := common.NewToken()
 		if err != nil {
-			b.JsonError("JWToken Auth", TokenAuthError, StringMap{})
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{}, true)
 			b.StopRun()
 		}
 
 		// 验证是否是root token 不能使用root token
 		isroot, err := jwtoken.IsRootToken(token)
 		if err != nil {
-			b.JsonError("JWToken Auth", TokenAuthError, StringMap{})
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{}, true)
 			b.StopRun()
 		}
 		if isroot {
-			b.JsonError("JWToken Auth", fmt.Sprintf("%s", TokenAuthError, "can't use root token"), StringMap{})
+			b.JsonError("JWToken Auth",
+				fmt.Sprintf("%s", TokenAuthError, "can't use root token"), StringMap{}, true)
 			b.StopRun()
 		}
 
 		_, err = jwtoken.IsTokenValid(token)
 		if err != nil {
-			b.JsonError("JWToken Auth", TokenAuthError, StringMap{})
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{}, true)
 			b.StopRun()
 		}
 	}

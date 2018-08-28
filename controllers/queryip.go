@@ -5,14 +5,18 @@ import (
 	"fmt"
 )
 
+var (
+	queryIPEntryType = "Query IP"
+)
+
 // Get Get方法
 func (q *QueryIPController) Get() {
 
-	ip := q.Ctx.Input.Param(":ip")
+	ip := q.GetString("ip")
 	qip := common.NewQueryIP("data/ip2region.db")
 	r, err := qip.Query(ip)
 	if err != nil {
-		q.JsonError("Query IP", fmt.Sprintf("%s", err), StringMap{})
+		q.JsonError(queryIPEntryType, fmt.Sprintf("%s", err), StringMap{}, true)
 		return
 	}
 
@@ -20,5 +24,5 @@ func (q *QueryIPController) Get() {
 		"ip":     ip,
 		"ipInfo": r,
 	}
-	q.JsonOK("query ip", data)
+	q.JsonOK(queryIPEntryType, data, true)
 }
