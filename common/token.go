@@ -7,14 +7,6 @@ import (
 	"github.com/chanyipiaomiao/hltool"
 )
 
-var (
-
-	// boltdb db操作对象
-	tokenDb *hltool.BoltDB
-
-	// jwt 签名字符串
-	signString string
-)
 
 const (
 
@@ -23,12 +15,15 @@ const (
 )
 
 // Token 结构体
-type Token struct{}
+type Token struct{
+	TokenDb *hltool.BoltDB
+	SignString string
+
+}
 
 // NewToken 返回Token对象
 func NewToken() (*Token, error) {
-	var err error
-	tokenDb, err = hltool.NewBoltDB(DBPath, tokenTableName)
+	tokenDb, err := hltool.NewBoltDB(DBPath, tokenTableName)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +31,12 @@ func NewToken() (*Token, error) {
 	if signString == "" {
 		return nil, fmt.Errorf("warning: in conf file jwtokenSignString must not null")
 	}
-	return &Token{}, nil
+	return &Token{TokenDb:tokenDb, SignString: signString}, nil
 }
 
 // GetToken 根据name获取token
 func (t *Token) GetToken(name string) (map[string][]byte, error) {
-	result, err := tokenDb.Get([]string{name})
+	result, err := t.TokenDb.Get([]string{name})
 	if err != nil {
 		return nil, fmt.Errorf("get token < %s > error: %s", name, err)
 	}
@@ -69,7 +64,7 @@ func (t *Token) IsExistToken(name string) (bool, error) {
 
 // IsTokenValid token是否有效
 func (t *Token) IsTokenValid(token string) (bool, error) {
-	jwt := hltool.NewJWToken(signString)
+	jwt := hltool.NewJWToken(t.SignString)
 	parseToken, err := jwt.ParseJWToken(token)
 	if err != nil {
 		return false, err
@@ -80,7 +75,7 @@ func (t *Token) IsTokenValid(token string) (bool, error) {
 		return false, err
 	}
 	if _, ok := dbToken[tokenName]; !ok {
-		return false, nil
+		return false, fmt.Errorf("token is not exist")
 	}
 	if string(dbToken[tokenName]) == token {
 		return true, nil
@@ -91,7 +86,7 @@ func (t *Token) IsTokenValid(token string) (bool, error) {
 
 // IsRootToken 是否是root token,root token 不能被用来请求
 func (t *Token) IsRootToken(token string) (bool, error) {
-	jwt := hltool.NewJWToken(signString)
+	jwt := hltool.NewJWToken(t.SignString)
 	parseToken, err := jwt.ParseJWToken(token)
 	if err != nil {
 		return false, err
@@ -117,7 +112,7 @@ func (t *Token) DeleteToken(rootToken, name string) error {
 
 	r, err := t.IsExistToken(name)
 	if r {
-		err = tokenDb.Delete([]string{name})
+		err = t.TokenDb.Delete([]string{name})
 		if err != nil {
 			return fmt.Errorf("delete token < %s > error: %s", name, err)
 		}
@@ -148,13 +143,13 @@ func (t *Token) AddToken(rootToken, name string) error {
 		"updateTime": hltool.GetNowTimeStamp(),
 	}
 
-	jwt := hltool.NewJWToken(signString)
+	jwt := hltool.NewJWToken(t.SignString)
 	token, err := jwt.GenJWToken(tokenValue)
 	if err != nil {
 		return err
 	}
 
-	tokenDb.Set(map[string][]byte{
+	t.TokenDb.Set(map[string][]byte{
 		name: []byte(token),
 	})
 

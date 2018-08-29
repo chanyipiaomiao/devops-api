@@ -142,8 +142,7 @@ func (b *BaseController) Prepare() {
 			b.StopRun()
 		}
 		if isroot {
-			b.JsonError("JWToken Auth",
-				fmt.Sprintf("%s", TokenAuthError, "can't use root token"), StringMap{}, true)
+			b.JsonError("JWToken Auth", TokenAuthError, StringMap{}, true)
 			b.StopRun()
 		}
 
