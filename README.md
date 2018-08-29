@@ -69,7 +69,23 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 
 ## 使用
 
-**注意: 如果配置文件app.conf中, security->enableToken 的值是 false, 可以跳过 步骤2 和 步骤3, 默认为true, 如果是false 可以不用在请求头里面添加 DEVOPS-API-TOKEN 头**
+配置文件说明:
+
+- app.conf          主配置文件
+- dev.conf          开发时的配置文件
+- prod.conf         线上生产运行时的配置文件
+- authpassword.conf 验证密码配置文件
+- db.conf           数据库配置文件
+- email.conf        邮箱用户名和密码配置
+- log.conf          日志相关配置
+- security.conf     安全相关的配置
+- twostep.conf      2步验证相关
+- weixin.conf       微信报警相关
+
+主配置文件 app.conf 通过include的方式加载其他的配置文件
+
+
+**注意: 如果配置文件security.conf中, security->enableToken 的值是 false, 可以跳过 步骤2 和 步骤3, 默认为true, 如果是false 可以不用在请求头里面添加 DEVOPS-API-TOKEN 头**
 
 
 1. 自定义配置(**该步骤可选**)
@@ -134,7 +150,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 
 [返回到目录](#目录)
 
-# 依赖
+# 开发依赖
 
 ```go
 go get github.com/astaxie/beego
@@ -161,7 +177,7 @@ go get github.com/chanyipiaomiao/ip2region/binding/golang
 
 
 ```sh
-GET /api/v1/queryip?ip=1.1.1.1
+GET /api/v1/queryip?ip=xxx.xxx.xxx.xxx
 
 ip  要查询的IP地址
 ```
@@ -170,18 +186,20 @@ ip  要查询的IP地址
 
 ```sh
 {
-    "entryType": "query ip",
-    "errmsg": "",
-    "ip": "1.1.1.1",
-    "ipInfo": {
-        "CityId": 0,
-        "Country": "中国",
-        "Region": "0",
-        "Province": "上海",
-        "City": "上海",
-        "ISP": "电信"
+    "data": {
+        "ip": "xxx.xxx.xxx.xxx",
+        "ipInfo": {
+            "CityId": 995,
+            "Country": "中国",
+            "Region": "0",
+            "Province": "上海",
+            "City": "上海市",
+            "ISP": "电信"
+        }
     },
-    "requestID": "474b7bbc-a453-45cd-8d01-03f57de22a44",
+    "entryType": "Query IP",
+    "errmsg": "",
+    "requestId": "6aae483e-5c72-4cb7-bbb7-50089e2da4d3",
     "statuscode": 0
 }
 ```
@@ -266,7 +284,7 @@ workday 是指放假安排中的调整上班的日期
 #### 判断给定的日期是节假日工作日周末
 
 ```sh
-GET /api/v1/holiworkday?date=2018-10-08
+GET /api/v1/holiworkday?date=2018-08-25
 
 date: 判断的日期, 日期格式不足2位必须补0
 ```
@@ -274,11 +292,13 @@ date: 判断的日期, 日期格式不足2位必须补0
 返回:
 ```sh
 {
-    "date": "2018-10-08",
-    "dateType": "workday",
-    "entryType": "judgment holiday/workday",
+    "data": {
+        "date": "2018-08-25",
+        "dateType": "weekend"
+    },
+    "entryType": "Get Holiday/Workday",
     "errmsg": "",
-    "requestID": "2a0cb77a-f622-4f75-b5e4-e574c015f6f6",
+    "requestId": "562444c2-1a48-4c69-9ed1-d2553dea3cba",
     "statuscode": 0
 }
 
@@ -350,14 +370,16 @@ issuer 可以是比如 公司的域名/公司的代号等
 
 ```sh
 {
-    "enable": true,
-    "key": "656C7AAU556TAMNONWZXLPEYTCXR3QE2",
-    "qrImage": "/static/download/qr/lei.he.png",
-    "requestId": "ee3145bf-c329-4830-947b-69ef74a269f5",
+    "data": {
+        "key": "xxxxxxxxxxxx",
+        "qrImage": "/static/download/qr/xxxx.png"
+    },
+    "entryType": "TwoStepAuth",
+    "errmsg": "",
+    "requestId": "e55fc2ea-4465-4a4f-aba7-f73272900b03",
     "statuscode": 0
 }
 
-enable 		启用成功
 qrImage 	2步验证 二维码图片路径
 key     	没办法扫描二维码时可以手动添加
 statuscode  	返回0,代表成功,其他失败 
@@ -378,10 +400,15 @@ token:    6位数字的验证码
 
 ```sh
 {
-    "auth": true,
-    "requestId": "2f9aa9b5-2c02-4c7f-af4e-3c1d931eb7aa",
-    "statuscode": 0,
-    "username": "lei.he"
+    "data": {
+        "auth": false,
+        "issuer": "xxxxx",
+        "username": "xxxxxxx"
+    },
+    "entryType": "TwoStepAuth",
+    "errmsg": "Tokens mismatch.",
+    "requestId": "5529567b-1c5a-4e04-aaa0-5a86ac19ca94",
+    "statuscode": 1
 }
 
 auth: 验证成功true, 不成功false
@@ -399,13 +426,17 @@ GET /api/v1/twostepauth/disable?username=用户名
 
 ```sh
 {
-    "disable": true,
-    "requestId": "4f73c93c-ae99-4582-81b1-81ce75133599",
-    "statuscode": 0,
-    "username": "lei.he"
+    "data": {
+        "disable": "yes",
+        "username": "xxxxx"
+    },
+    "entryType": "TwoStepAuth",
+    "errmsg": "",
+    "requestId": "4451ef02-f245-466a-8bb4-172238f47c50",
+    "statuscode": 0
 }
 
-disable 禁用成功,删除二维码图片,从数据库中删除该用户
+disable: yes 禁用成功,删除二维码图片,从数据库中删除该用户
 ```
 
 [返回到目录](#目录)
@@ -418,7 +449,7 @@ disable 禁用成功,删除二维码图片,从数据库中删除该用户
 #### 存储
 
 ```sh
-POST /api/v1/storepass/update
+POST /api/v1/storepass
 
 设置头部: Content-Type: application/json
 
@@ -433,13 +464,18 @@ POST /api/v1/storepass/update
 uniqueId 唯一标识
 
 注意字段名称必须是以上格式
+
 ```
 返回结果:
 ```sh
 {
-    "requestID": "13b4dc78-7f28-4477-a7c6-e319cb1c00ea",
-    "statuscode": 0,
-    "update": true
+    "data": {
+        "update": "ok"
+    },
+    "entryType": "Store Password",
+    "errmsg": "",
+    "requestId": "2494ad20-ca52-4d3e-8e8e-6dd0d6289f4a",
+    "statuscode": 0
 }
 ```
 
@@ -447,7 +483,7 @@ uniqueId 唯一标识
 
 #### 查询
 ```sh
-GET /api/v1/storepass/get?id=10.10.1.2,1.1.1.1
+GET /api/v1/storepass/10.10.1.2,1.1.1.1
 
 多个标识逗号分开
 ```
@@ -455,15 +491,18 @@ GET /api/v1/storepass/get?id=10.10.1.2,1.1.1.1
 返回结果:
 ```sh
 {
-    "get": true,
-    "password": {
-        "1.1.1.1": {},
-        "10.10.1.2": {
-            "root": "444",
-            "user1": "333"
+    "data": {
+        "password": {
+            "1.1.1.1": {},
+            "10.10.1.2": {
+                "root": "444",
+                "user1": "333"
+            }
         }
     },
-    "requestID": "35ce7716-2721-4c0b-82ee-f258fdb9a6c1",
+    "entryType": "Store Password",
+    "errmsg": "",
+    "requestId": "d5f61efe-8c22-4e4e-9d97-c343eb1e7f58",
     "statuscode": 0
 }
 
@@ -474,7 +513,7 @@ GET /api/v1/storepass/get?id=10.10.1.2,1.1.1.1
 #### 删除
 
 ```sh
-GET /api/v1/storepass/delete?id=10.10.1.2,1.1.1.1
+DELETE /api/v1/storepass/10.10.1.2,1.1.1.1
 
 如果请求的标识在数据库中不存从则返回空
 ```
@@ -482,9 +521,13 @@ GET /api/v1/storepass/delete?id=10.10.1.2,1.1.1.1
 返回结果:
 ```sh
 {
-    "delete": true,
-    "id": "10.10.1.2,1.1.1.1",
-    "requestID": "562ca3e3-52bd-43ff-8ba2-09b20b928baa",
+    "data": {
+        "delete": "ok",
+        "id": "10.10.1.2,1.1.1.1"
+    },
+    "entryType": "Store Password",
+    "errmsg": "",
+    "requestId": "29ed3301-319f-45b6-8cbd-934becc7c5cb",
     "statuscode": 0
 }
 ```
@@ -782,7 +825,7 @@ func main() {
 ### 获取字符串的MD5值api接口
 
 ```sh
-GET /api/v1/md5?string=123456
+GET /api/v1/md5?rawstr=123456
 ```
 
 可以写一个shell脚本命令行传入字符串，返回MD5值
