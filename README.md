@@ -862,7 +862,7 @@ POST /api/v1/password/authPassword
 #### 获取程序自身版本信息api接口
 
 ```sh
-GET /version  
+GET /api/v1/version  
 ```
 
 [返回到目录](#目录)
