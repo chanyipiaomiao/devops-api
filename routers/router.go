@@ -42,13 +42,11 @@ func init() {
 			beego.NSNamespace("/queryip",
 				beego.NSRouter("", &controllers.QueryIPController{}),
 			),
+			beego.NSNamespace("/version",
+				beego.NSRouter("", &controllers.VersionController{}),
+			),
 		),
 	)
 	beego.AddNamespace(apins)
 
-	versions := beego.NewNamespace("/version",
-		beego.NSRouter("", &controllers.VersionController{}),
-	)
-
-	beego.AddNamespace(versions)
 }
