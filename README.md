@@ -1,9 +1,10 @@
 # devops-api
 
-Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，提供开发/运维常用操作的HTTP API接口: IP地址查询、工作日节假日判断、微信报警、钉钉报警、2步验证、密码存储、发送邮件、生成随机密码等功能
+Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，提供开发/运维常用操作的HTTP API接口: 手机归属地查询、IP地址查询、工作日节假日判断、微信报警、钉钉报警、2步验证、密码存储、发送邮件、生成随机密码等功能
 
 # 主要功能
 
+- 手机归属地查询
 - IP地址查询
 - 工作日节假日判断
 - 微信报警
@@ -21,6 +22,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 - [安装使用](#安装使用)
 - [依赖](#依赖)
 - [功能列表](#功能列表)
+    - [手机归属地查询](#手机归属地查询)
     - [IP地址查询](#ip地址查询)
 	- [工作日节假日判断](#工作日节假日判断)
 		- [设置节假日和工作日](#设置节假日和工作日)
@@ -81,6 +83,7 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 - security.conf     安全相关的配置
 - twostep.conf      2步验证相关
 - weixin.conf       微信报警相关
+- phone.conf        手机归属地查询配置
 
 主配置文件 app.conf 通过include的方式加载其他的配置文件
 
@@ -169,11 +172,42 @@ go get github.com/chanyipiaomiao/ip2region/binding/golang
 
 # API
 
+## 手机归属地查询
+
+本功能使用了 [xluohome](https://github.com/xluohome/phonedata) 项目提供的手机归属地数据库
+
+首先进入到script目录，执行 get_phone_dat.sh 来下载数据文件，可以定期执行脚本获取最新的.
+
+```sh
+/api/v1/queryphone?phone=手机号
+
+phone 要查询的手机号
+```
+
+返回:
+
+```sh
+{
+    "data": {
+        "AreaZone": "021",
+        "CardType": "中国移动",
+        "City": "上海",
+        "PhoneNum": "xxxxxxxxxx",
+        "Province": "上海",
+        "ZipCode": "200000"
+    },
+    "entryType": "Query Phone Location",
+    "errmsg": "",
+    "requestId": "0860edaa-db7f-46ee-ac89-d41eeb2ed80d",
+    "statuscode": 0
+}
+```
+
 ## IP地址查询
 
 本功能使用了 [狮子的魂](https://gitee.com/lionsoul/ip2region) 项目提供的IP地址数据库.
 
-首先要执行 script 目录下的 gen_ip_region.sh 脚本, 来下载IP地址数据库, 可以定期执行脚本.
+首先进入到script目录, 执行 gen_ip_region.sh 脚本, 来下载IP地址数据库, 可以定期执行脚本获取最新的.
 
 
 ```sh

@@ -204,3 +204,8 @@ type HolidayController struct {
 type QueryIPController struct {
 	BaseController
 }
+
+// PhoneController 手机归属地查询
+type PhoneController struct {
+	BaseController
+}
