@@ -166,6 +166,7 @@ go get github.com/chanyipiaomiao/hltool
 go get github.com/chanyipiaomiao/weixin-kit
 go get github.com/chanyipiaomiao/cal
 go get github.com/chanyipiaomiao/ip2region/binding/golang
+go get github.com/chanyipiaomiao/phonedata
 ```
 
 [返回到目录](#目录)
