@@ -18,6 +18,10 @@ Golang + Beego编写, 提供一些开发/运维常见操作的HTTP API接口，�
 
 更多功能,正在思考中...
 
+# 尝试一下
+
+不用部署, 可以到 [https://devops-api.com/](https://devops-api.com/) 尝试一下部分功能
+
 # 目录
 - [安装使用](#安装使用)
 - [依赖](#依赖)
